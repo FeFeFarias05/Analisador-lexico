@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Analisador {
 
-    // Declarações globais
+   
     private static int charClass;
     private static char[] lexeme = new char[100];
     private static char nextChar;
@@ -13,12 +13,12 @@ public class Analisador {
     private static int nextToken;
     private static BufferedReader in_fp;
 
-    // Classes de caracteres
+   
     private static final int LETTER = 0;
     private static final int DIGIT = 1;
     private static final int UNKNOWN = 99;
 
-    // Códigos de tokens
+   
     private static final int INT_LIT = 10;
     private static final int IDENT = 11;
     private static final int ASSIGN_OP = 20;
@@ -82,8 +82,8 @@ public class Analisador {
 
     private static void getChar() {
         try {
-            int readChar = in_fp.read(); // Lê o próximo caractere do arquivo
-            if (readChar != -1) { // Verifica se não é o fim do arquivo
+            int readChar = in_fp.read(); // Le o proximo caractere do arquivo
+            if (readChar != -1) { // Verifica se n é o fim do arquivo
                 nextChar = (char) readChar;
                 if (Character.isLetter(nextChar))
                     charClass = LETTER;
@@ -123,7 +123,7 @@ public class Analisador {
         lexLen = 0;
         getNonBlank();
         switch (charClass) {
-            // Analisa identificadores e palavras reservadas
+          
             case LETTER:
                 addChar();
                 getChar();
@@ -167,7 +167,7 @@ public class Analisador {
                 }
                 break;
 
-            // Analisa literais inteiros
+           
             case DIGIT:
                 addChar();
                 getChar();
@@ -178,18 +178,18 @@ public class Analisador {
                 nextToken = INT_LIT;
                 break;
 
-            // Parênteses e operadores
+            
             case UNKNOWN:
                 lookup(nextChar);
                 getChar();
                 break;
 
-            // Fim do arquivo
+        // fim do arq
             case -1:
                 nextToken = -1;
                 lexeme = new char[] { 'E', 'O', 'F' };
                 break;
-        } // Fim do switch
+        } // fim do switch
         System.out.printf("Next token is: %d, Next lexeme is %s\n", nextToken, new String(lexeme).trim());
         return nextToken;
     }
@@ -200,7 +200,7 @@ public class Analisador {
             getChar();
             do {
                 lex();
-            } while (nextToken != -1); // EOF é representado por -1
+            } while (nextToken != -1); // EOF 
         } catch (IOException e) {
             System.out.println("ERROR - cannot open front.in");
         }
