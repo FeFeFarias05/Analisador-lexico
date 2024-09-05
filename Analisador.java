@@ -36,7 +36,42 @@ public class Analisador{
     private static final int INT_PAL = 25;
     private static final int FLOAT_PAL = 26;
     private static final int SWITCH_PAL = 27;
-    
+
+    private static int lookup(char ch) {
+        switch (ch) {
+            case '(':
+                addChar();
+                nextToken = LEFT_PAREN;
+                break;
+            case ')':
+                addChar();
+                nextToken = RIGHT_PAREN;
+                break;
+            case '+':
+                addChar();
+                nextToken = ADD_OP;
+                break;
+            case '-':
+                addChar();
+                nextToken = SUB_OP;
+                break;
+            case '*':
+                addChar();
+                nextToken = MULT_OP;
+                break;
+            case '/':
+                addChar();
+                nextToken = DIV_OP;
+                break;
+            default:
+                addChar();
+                nextToken = -1; // EOF ou desconhecido
+                break;
+        }
+        return nextToken;
+    }
+
+
     private static void addChar() {
         if (lexLen <= 98) {
             lexeme[lexLen++] = nextChar;
@@ -48,8 +83,8 @@ public class Analisador{
 
     private static void getChar() {
         try {
-            int readChar = in_fp.read();
-            if (readChar != -1) {
+            int readChar = in_fp.read(); // Lê o próximo caractere do arquivo
+            if (readChar != -1) { // Verifica se não é o fim do arquivo
                 nextChar = (char) readChar;
                 if (Character.isLetter(nextChar))
                     charClass = LETTER;
@@ -61,13 +96,84 @@ public class Analisador{
                 charClass = -1; // EOF
             }
         } catch (IOException e) {
-            charClass = -1; // EOF
+            charClass = -1; // EOF em caso de erro de leitura
         }
     }
-    
+
     private static void getNonBlank() {
         while (Character.isWhitespace(nextChar))
             getChar();
+    }
+
+    private static int lex() {
+        lexLen = 0;
+        getNonBlank();
+        switch (charClass) {
+            // Analisa identificadores e palavras reservadas
+            case LETTER:
+                addChar();
+                getChar();
+                while (charClass == LETTER || charClass == DIGIT) {
+                    addChar();
+                    getChar();
+                }
+                String lexemeStr = new String(lexeme).trim();
+                switch (lexemeStr) {
+                    case "for":
+                        nextToken = FOR_PAL;
+                        break;
+                    case "if":
+                        nextToken = IF_PAL;
+                        break;
+                    case "else":
+                        nextToken = ELSE_PAL;
+                        break;
+                    case "while":
+                        nextToken = WHILE_PAL;
+                        break;
+                    case "do":
+                        nextToken = DO_PAL;
+                        break;
+                    case "int":
+                        nextToken = INT_PAL;
+                        break;
+                    case "float":
+                        nextToken = FLOAT_PAL;
+                        break;
+                    case "switch":
+                        nextToken = SWITCH_PAL;
+                        break;
+                    default:
+                        nextToken = IDENT;
+                        break;
+                }
+                break;
+
+            // Analisa literais inteiros
+            case DIGIT:
+                addChar();
+                getChar();
+                while (charClass == DIGIT) {
+                    addChar();
+                    getChar();
+                }
+                nextToken = INT_LIT;
+                break;
+
+            // Parênteses e operadores
+            case UNKNOWN:
+                lookup(nextChar);
+                getChar();
+                break;
+
+            // Fim do arquivo
+            case -1:
+                nextToken = -1;
+                lexeme = new char[]{'E', 'O', 'F'};
+                break;
+        } // Fim do switch
+        System.out.printf("Next token is: %d, Next lexeme is %s\n", nextToken, new String(lexeme).trim());
+        return nextToken;
     }
     public static void main(String[] args) {
         try {
@@ -75,119 +181,12 @@ public class Analisador{
             getChar();
             do {
                 lex();
-            } while (nextToken != -1); // EOF is represented by -1
+            } while (nextToken != -1); // EOF é representado por -1
         } catch (IOException e) {
             System.out.println("ERROR - cannot open front.in");
         }
     }
 
     
-        
-        private static int lookup(char ch) {
-            switch (ch) {
-                case '(':
-                    addChar();
-                    nextToken = LEFT_PAREN;
-                    break;
-                case ')':
-                    addChar();
-                    nextToken = RIGHT_PAREN;
-                    break;
-                case '+':
-                    addChar();
-                    nextToken = ADD_OP;
-                    break;
-                case '-':
-                    addChar();
-                    nextToken = SUB_OP;
-                    break;
-                case '*':
-                    addChar();
-                    nextToken = MULT_OP;
-                    break;
-                case '/':
-                    addChar();
-                    nextToken = DIV_OP;
-                    break;
-                default:
-                    addChar();
-                    nextToken = -1; // EOF
-                    break;
-            }
-            return nextToken;
-        }
-    
-    
-        private static int lex() {
-            lexLen = 0;
-            getNonBlank();
-            switch (charClass) {
-                // Analisa identificadores e palavras reservadas
-                case LETTER:
-                    addChar();
-                    getChar();
-                    while (charClass == LETTER || charClass == DIGIT) {
-                        addChar();
-                        getChar();
-                    }
-                    String lexemeStr = new String(lexeme).trim();
-                    switch (lexemeStr) {
-                        case "for":
-                            nextToken = FOR_PAL;
-                            break;
-                        case "if":
-                            nextToken = IF_PAL;
-                            break;
-                        case "else":
-                            nextToken = ELSE_PAL;
-                            break;
-                        case "while":
-                            nextToken = WHILE_PAL;
-                            break;
-                        case "do":
-                            nextToken = DO_PAL;
-                            break;
-                        case "int":
-                            nextToken = INT_PAL;
-                            break;
-                        case "float":
-                            nextToken = FLOAT_PAL;
-                            break;
-                        case "switch":
-                            nextToken = SWITCH_PAL;
-                            break;
-                        default:
-                            nextToken = IDENT;
-                            break;
-                    }
-                    break;
-    
-                // Analisa literais inteiros
-                case DIGIT:
-                    addChar();
-                    getChar();
-                    while (charClass == DIGIT) {
-                        addChar();
-                        getChar();
-                    }
-                    nextToken = INT_LIT;
-                    break;
-    
-                // Parênteses e operadores
-                case UNKNOWN:
-                    lookup(nextChar);
-                    getChar();
-                    break;
-    
-                // Fim do arquivo
-                case -1:
-                    nextToken = -1;
-                    lexeme = new char[] { 'E', 'O', 'F' };
-                    break;
-            } // Fim do switch
-            System.out.printf("Next token is: %d, Next lexeme is %s\n", nextToken, new String(lexeme).trim());
-            return nextToken;
-        }
-    }
-    
 
+}
