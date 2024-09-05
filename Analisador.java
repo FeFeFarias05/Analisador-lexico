@@ -2,7 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class Analisador{
+public class Analisador {
 
     // Declarações globais
     private static int charClass;
@@ -71,7 +71,6 @@ public class Analisador{
         return nextToken;
     }
 
-
     private static void addChar() {
         if (lexLen <= 98) {
             lexeme[lexLen++] = nextChar;
@@ -103,6 +102,21 @@ public class Analisador{
     private static void getNonBlank() {
         while (Character.isWhitespace(nextChar))
             getChar();
+    }
+
+    // isEndOfFile()
+    // determina se o arquivo que esta sendo lido chegou ao fim
+    // ready() eh um metodo do bufferedreader que retorna true se a stream esta
+    // pronta
+    // para ser lida.
+    // Se o arquivo chegou ao fim, o metodo ready() retornara false.
+    public static boolean isEndOfFile() {
+        try {
+            return !in_fp.ready();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return true;
+        }
     }
 
     private static int lex() {
@@ -144,7 +158,11 @@ public class Analisador{
                         nextToken = SWITCH_PAL;
                         break;
                     default:
-                        nextToken = IDENT;
+                        if (isEndOfFile()) {
+                            nextToken = -1;
+                        } else {
+                            nextToken = IDENT;
+                        }
                         break;
                 }
                 break;
@@ -169,12 +187,13 @@ public class Analisador{
             // Fim do arquivo
             case -1:
                 nextToken = -1;
-                lexeme = new char[]{'E', 'O', 'F'};
+                lexeme = new char[] { 'E', 'O', 'F' };
                 break;
         } // Fim do switch
         System.out.printf("Next token is: %d, Next lexeme is %s\n", nextToken, new String(lexeme).trim());
         return nextToken;
     }
+
     public static void main(String[] args) {
         try {
             in_fp = new BufferedReader(new FileReader("front.in"));
@@ -186,7 +205,5 @@ public class Analisador{
             System.out.println("ERROR - cannot open front.in");
         }
     }
-
-    
 
 }
